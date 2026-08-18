@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>JJSAK — Joke Demo</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="container">
+    <h1>Random Joke</h1>
+    <p>Click to fetch a random joke from an external API (proxied through the backend).</p>
+    <div class="controls">
+      <button id="getJoke">Get a joke</button>
+    </div>
+    <div id="joke" class="joke"></div>
+    <div id="source" class="source"></div>
+  </main>
+
+  <script>
+    const btn = document.getElementById('getJoke');
+    const out = document.getElementById('joke');
+    const src = document.getElementById('source');
+
+    async function loadJoke() {
+      btn.disabled = true;
+      btn.textContent = 'Loading...';
+      out.textContent = '';
+      src.textContent = '';
+      try {
+        const resp = await fetch('/api/joke');
+        if (!resp.ok) throw new Error('Network response was not ok');
+        const data = await resp.json();
+        if (data.ok && data.joke) {
+          out.textContent = data.joke;
+          src.textContent = data.source ? `source: ${data.source}` : '';
+        } else if (data.joke) {
+          out.textContent = data.joke;
+        } else {
+          out.textContent = 'No joke returned.';
+        }
+      } catch (err) {
+        out.textContent = 'Error fetching joke: ' + (err.message || err);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Get a joke';
+      }
+    }
+
+    btn.addEventListener('click', loadJoke);
+  </script>
+</body>
+</html>
